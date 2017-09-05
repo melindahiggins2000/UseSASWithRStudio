@@ -1,0 +1,135 @@
+---
+title: "SAS with Rmarkdown"
+author: "Melinda K. Higgins, PhD."
+date: "September 5, 2017"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+
+# see what the initial knitr engine settings are
+knitr::opts_chunk$get()$engine
+knitr::opts_chunk$get()$engine.path
+knitr::opts_chunk$get()$engine.opts
+
+```
+
+## Resource Link
+
+To get started using `SAS` as your statistical software/data processing "engine" take a look at the following article: [http://www.ssc.wisc.edu/~hemken/SASworkshops/Markdown/SASmarkdown.html](http://www.ssc.wisc.edu/~hemken/SASworkshops/Markdown/SASmarkdown.html).
+
+Also read up on the `SASmarkdown` package [https://cran.r-project.org/web/packages/SASmarkdown/](https://cran.r-project.org/web/packages/SASmarkdown/).
+
+## Setup
+
+To get started you need:
+
+1. Have SAS installed locally on your machine (i.e. you need a licensed copy)
+2. you need to know where on your local drive that your SAS executable is located. Mine is located at `C:\Program Files\SASHome\SASFoundation\9.4\sas.exe`.
+3. Install the `SASmarkdown` package.
+4. Then setup your `knitr` options as follows:
+
+```
+saspath <- "C:/Program Files/SASHome/SASFoundation/9.4/sas.exe"
+sasopts <- "-nosplash -linesize 75"
+knitr::opts_chunk$set(engine="sashtml", engine.path=saspath, 
+        engine.opts=sasopts, comment=NA)
+```
+
+## Change settings to use HTML output from SAS
+
+NOTE: You will need to install the `SASmarkdown` package first. For this exercise we're using `engine="sashtml"` which works well when `knitting` to HTML. However, this format will not work if you `knit` to PDF or DOC. This leverages the ODS output from SAS.
+
+
+```{r}
+# load the SASmarkdown package
+library(SASmarkdown)
+
+# set up the options so that knit knows where you SAS executable is
+# set the linesize to be easily readable on letter size paper, portrait
+# and set the knir options using opts_chunk$set().
+saspath <- "C:/Program Files/SASHome/SASFoundation/9.4/sas.exe"
+sasopts <- "-nosplash -linesize 75"
+knitr::opts_chunk$set(engine="sashtml", engine.path=saspath, 
+        engine.opts=sasopts, comment=NA)
+
+# run these commands to convince yourself that
+# within this knitr session the engine changed.
+knitr::opts_chunk$get()$engine
+knitr::opts_chunk$get()$engine.path
+knitr::opts_chunk$get()$engine.opts
+```
+
+## If you want to use `SAS` but make PDF or DOC files
+
+If you want to `knit` to PDF or DOC, you should change the engine to `engine="sas"`. This will NOT use ODS output from SAS.
+
+```
+saspath <- "C:/Program Files/SASHome/SASFoundation/9.4/sas.exe"
+sasopts <- "-nosplash -linesize 75"
+knitr::opts_chunk$set(engine="sas", engine.path=saspath, 
+        engine.opts=sasopts, comment=NA)
+```
+
+## Try some `SAS` code
+
+This code chunk runs te `PROC MEANS` command from `SAS` using the built in dataset `sashelp.class`.
+
+```{r}
+proc means data=sashelp.class;
+run;
+```
+
+## More SAS code 
+
+... and another `SAS` code chunk using the `PROC CORR` commands to see correlations between the variables and also visualize the scatterplot matrix.
+
+```{r}
+proc corr data=sashelp.class plots=matrix;
+run;
+```
+
+## Reset engine to R
+
+While this is great using SAS, if you want to switch back to using R within the same Rmarkdown document, within the same `knitr` session, you'll need to tell `knitr` that you are switching engines.
+
+To get this next chunk to run, you'll need to reset the `knitr` engine within the chunk options directly and then use the command `knitr::opts_chunk$set(engine="R", engine.path=NULL, engine.opts=NULL, comment=NA)` to reset back to `R`.
+
+```{r, engine='R'}
+# this chunk has the engine set back to `R`
+
+# run a short bit of r code
+x <- 5
+x
+
+# check the current engine
+knitr::opts_chunk$get()$engine
+
+# reset the engine globally (i.e. so it will work outside of
+# this chunk so you don't have to keep typing engine=`R`)
+knitr::opts_chunk$set(engine="R",  engine.path=NULL, 
+        engine.opts=NULL, comment=NA)
+
+# confirm that this change was applied
+knitr::opts_chunk$get()$engine
+knitr::opts_chunk$get()$engine.path
+knitr::opts_chunk$get()$engine.opts
+```
+
+...and here is a new chunk with no engine defined but the engine has defaulted back to `R`.
+
+```{r}
+# this chunk didn't list the engine explicitly, so let's
+# make sure the global change carried over into this chunk
+knitr::opts_chunk$get()$engine
+
+# and another short bit of R code
+y <- 3
+y
+```
+
+
